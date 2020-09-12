@@ -1,4 +1,6 @@
-#### Table of Contents
+# Unofficial TD Ameritrade Python API Library
+
+## Table of Contents
 
 - [Overview](#overview)
 - [What's in the API](#whats-in-the-api)
@@ -11,9 +13,9 @@
 - [Support These Projects](#support-these-projects)
 - [Authentication Workflow](#authentication-workflow)
 
----
-
 ## Overview
+
+Current Version: **0.3.0**
 
 The unofficial Python API client library for TD Ameritrade allows individuals with TD Ameritrade accounts to manage trades, pull historical and real-time data, manage their accounts, create and modify orders all using the Python programming language.
 
@@ -60,6 +62,12 @@ The project can be found at PyPI, if you'd like to view the project please use t
 pip install td-ameritrade-python-api
 ```
 
+To upgrade the library run the following command:
+
+```bash
+pip install --upgrade td-ameritrade-python-api
+```
+
 ## Usage
 
 This example demonstrates how to login to the API and demonstrates sending a request using the `get_quotes` endpoint, using your API key.
@@ -70,9 +78,8 @@ from td.client import TDClient
 
 # Create a new session, credentials path is optional.
 TDSession = TDClient(
-    account_number='ACCOUNT_NUMBER',
-    consumer_id='CONSUMER_ID',
-    redirect_uri='REDIRECT_URI',
+    client_id='<CLIENT_ID>',
+    redirect_uri='<REDIRECT_URI>',
     credentials_path='<PATH_TO_CREDENTIALS_FILE>'
 )
 
@@ -80,7 +87,7 @@ TDSession = TDClient(
 TDSession.login()
 
 # Grab real-time quotes for 'MSFT' (Microsoft)
-msft_quotes = TDSession.get_quotes(instruments='MSFT')
+msft_quotes = TDSession.get_quotes(instruments=['MSFT'])
 
 # Grab real-time quotes for 'AMZN' (Amazon) and 'SQ' (Square)
 multiple_quotes = TDSession.get_quotes(instruments=['AMZN','SQ'])
@@ -100,10 +107,12 @@ For certain requests, in a limited fashion, it will help validate your request w
 
 Requests for saved orders, regular orders, watchlists, and option chains can be a challenging process that has multiple opportunities to make mistakes. This library has built-in objects that will allow you to quickly build your request and then validate certain portions of your request when possible.
 
-## Requirements
+### Library Requirements
+
+The following requirements must be met before being able to use the TD Ameritrade Python API library.
 
 - You must have a TD Ameritrade Account.
-- You must have a TD Ameritrade Developer Account. Please go to following [folder](https://github.com/areed1192/td-ameritrade-python-api/tree/master/samples/resources/td-developer-account) for instructions on how to create a Developer account.
+- You must have a TD Ameritrade Developer Account. Please go to following [folder](https://github.com/areed1192/td-ameritrade-python-api/tree/master/samples/resources) for instructions on how to create a Developer account.
 
 ## Documentation and Resources
 
@@ -128,7 +137,7 @@ Help support this project and future projects by donating to my [Patreon Page](h
 If you'd like to watch more of my content, feel free to visit my YouTube channel [Sigma Coding](https://www.youtube.com/c/SigmaCoding).
 
 **Hire Me:**
-If you have a project, you think I can help you with feel free to reach out at coding.sigma@gmail.com
+If you have a project, you think I can help you with feel free to reach out at [coding.sigma@gmail.com](mailto:coding.sigma@gmail.com?subject=[GitHub]%20Project%20Proposal) or fill out the [contract request form](https://forms.office.com/Pages/ResponsePage.aspx?id=ZwOBErInsUGliXx0Yo2VfcCSWZSwW25Es3vPV2veU0pUMUs5MUc2STkzSzVQMFNDVlI5NjJVNjREUi4u)
 
 ## Authentication Workflow
 
