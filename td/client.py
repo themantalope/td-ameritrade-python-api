@@ -487,8 +487,8 @@ class TDClient():
             self.grab_refresh_token()
 
 
-    @on_exception(fibo, RateLimitException, max_tries=20)
-    @limits(calls=120, period=ONE_MINUTE)
+    # @on_exception(fibo, RateLimitException, max_tries=20)
+    # @limits(calls=120, period=ONE_MINUTE)
     def _make_request(self, method: str, endpoint: str, mode: str = None, params: dict = None, data: dict = None, json:dict = None, 
                         order_details: bool = False) -> Any:
         """Handles all the requests in the library.
