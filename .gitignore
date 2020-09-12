@@ -114,3 +114,9 @@ pypirc
 
 # don't track the json with state
 *State.json
+tests/parse_level_two.py
+certs/
+td/td_state.json
+tests/api_pipeline.py
+tests/api_streaming.py
+td/certs.py

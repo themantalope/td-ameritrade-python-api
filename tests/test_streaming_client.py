@@ -1,34 +1,26 @@
-account_activity_fields = ['subscription-key',
-                           'account-id', 'message-type', 'message-data']
-level_one_forex_fields = ['symbol', 'bid-price', 'ask-price', 'last-price', 'bid-size', 'ask-size', 'total-volume', 'last-size', 'trade-time', 'quote-time', 'high-price', 'low-price', 'close-price', 'exchange-id', 'description',
-                          'digits', 'open-price', 'net-change', '52-week-low', 'exchange-name', 'security-status', 'mark', 'tick', 'tick-amount', 'product', 'percent-change', 'trading-hours', 'is-tradable', 'market-maker', '52-week-high']
-level_one_futures_fields = ['symbol', 'bid-price', 'ask-price', 'last-price', 'bid-size', 'ask-size', 'ask-id', 'bid-id', 'total-volume', 'last-size', 'trade-time', 'quote-time', 'high-price', 'low-price', 'close-price', 'exchange-id', 'description', 'last-id', 'open-price', 'net-change',
-                            'security-status', 'mark', 'open-interest', 'future-percent-change', 'exhange-name', 'tick', 'tick-amount', 'product', 'future-price-format', 'future-trading-hours', 'future-is-tradable', 'future-multiplier', 'future-is-active', 'future-settlement-price', 'future-active-symbol', 'future-expiration-date']
-level_one_futures_options_fields = ['symbol', 'bid-price', 'ask-price', 'last-price', 'bid-size', 'ask-size', 'ask-id', 'bid-id', 'total-volume', 'last-size', 'trade-time', 'quote-time', 'high-price', 'low-price', 'close-price', 'exchange-id', 'description', 'last-id', 'open-price', 'net-change',
-                                    'security-status', 'mark', 'open-interest', 'future-percent-change', 'exhange-name', 'tick', 'tick-amount', 'product', 'future-price-format', 'future-trading-hours', 'future-is-tradable', 'future-multiplier', 'future-is-active', 'future-settlement-price', 'future-active-symbol', 'future-expiration-date']
-level_one_option_fields = ['symbol', 'bid-price', 'ask-price', 'last-price', 'bid-size', 'ask-size', 'total-volume', 'last-size', 'trade-time', 'quote-time', 'high-price', 'low-price', 'close-price', 'quote-day', 'trade-day', 'volatility', 'description', 'digits', 'open-price', 'net-change', 'security-status', 'mark',
-                           'open-interest', 'money-intrinsic-value', 'expiration-year', 'multiplier', 'strike-price', 'contract-type', 'underlying', 'expiration-month', 'deliverables', 'time-value', 'expiration-day', 'days-to-expiration', 'delta', 'gamma', 'theta', 'vega', 'rho', 'theoretical-option-value', 'underlying-price', 'uv-expiration-type']
-level_one_quote_fields = ['symbol', 'bid-price', 'ask-price', 'last-price', 'bid-size', 'ask-size', 'ask-id', 'bid-id', 'total-volume', 'last-size', 'trade-time', 'quote-time', 'high-price', 'low-price', 'bid-tick', 'close-price', 'exchange-id', 'marginable', 'shortable', 'island-bid', 'island-ask', 'island-volume', 'quote-day', 'trade-day', 'volatility', 'description', 'last-id', 'digits', 'open-price', 'net-change', '52 -week-high', '52-week-low',
-                          'pe-ratio', 'dividend-amount', 'dividend-yield', 'island-bid-size', 'island-ask-size', 'nav', 'fund-price', 'exchange-name', 'dividend-date', 'regular-market-quote', 'regular-market-trade', 'regular-market-last-price', 'regular-market-last-size', 'regular-market-trade-time', 'regular-market-trade-day', 'regular-market-net-change', 'security-status', 'mark', 'quote-time-in-long', 'trade-time-in-long', 'regular-market-trade-time-in-long']
-news_headline_fields = ['symbol', 'error-code', 'story-datetime', 'headline-id', 'status',
-                        'headline', 'story-id', 'count-for-keyword', 'keyword-array', 'is-hot', 'story-source']
-qos_request_fields = ['express', 'real-time',
-                      'fast', 'moderate', 'slow', 'delayed']
-timesale_fields = ['symbol', 'last-price',
-                   'last-size', 'trade-time', 'last-sequence']
-chart_fields = ['key', 'open-price', 'high-price', 'low-price',
-                'close-price', 'volume', 'sequence', 'chart-time', 'chart-day']
-
+import json
 import pprint
+from configparser import ConfigParser
 from td.client import TDClient
-import config.credentials as config
 
+# Load the fields.
+with open(file=r"tests\unit\fields.jsonc", mode="r") as fields_file:
+    fields_dict=json.load(fp=fields_file)
+
+# Grab configuration values.
+config = ConfigParser()
+config.read('config/config.ini')
+
+CLIENT_ID = config.get('main', 'CLIENT_ID')
+REDIRECT_URI = config.get('main', 'REDIRECT_URI')
+JSON_PATH = config.get('main', 'JSON_PATH')
+ACCOUNT_NUMBER = config.get('main', 'ACCOUNT_NUMBER')
 
 # Create a new session
 TDSession = TDClient(
-    client_id=config.CLIENT_ID,
-    redirect_uri=config.REDIRECT_URI,
-    credentials_path=config.JSON_PATH
+    client_id=CLIENT_ID,
+    redirect_uri=REDIRECT_URI,
+    credentials_path=JSON_PATH
 )
 
 # Login to the session
@@ -39,24 +31,28 @@ TDStreamingClient = TDSession.create_streaming_session()
 
 # Set the data dump location
 TDStreamingClient.write_behavior(
-    file_path = r"C:\Users\Alex\OneDrive\Desktop\Sigma\Repo - TD API Client\td-ameritrade-python-api\samples\raw_data.csv", 
+    file_path = "raw_data.csv", 
     append_mode = True
 )
 
-# Charts, this looks like it only streams every one minute. Hence if you want the last bar you should use this.
-TDStreamingClient.chart(service='CHART_FUTURES', symbols=['/CL'], fields=[0,1,2,3,4,5,6,7])
+# # Charts, streams the latest minute bar.
+# TDStreamingClient.chart(service='CHART_FUTURES', symbols=['/CL', '/ES'], fields=[0,1,2,3,4,5,6,7])
 
-# # Charts, this looks like it only streams every one minute. Hence if you want the last bar you should use this.
-# TDStreamingClient.chart(service='CHART_OPTIONS', symbols=['MSFT_032720C9'], fields=[0,1,2,3,4,5,6,7])
+# # Charts Options - CANT GET TO WORK.
+# TDStreamingClient.chart(service='CHART_OPTIONS', symbols=['AAPL_200501C285'], fields=[0,1,2,3,4,5,6,7])
 
 # # Charts, this looks like it only streams every one minute. Hence if you want the last bar you should use this.
 # TDStreamingClient.chart(service='CHART_EQUITY', symbols=['MSFT'], fields=[0,1,2,3,4,5,6,7])
+
+# # Chart History Futures
+# TDStreamingClient.chart_history_futures(symbol=['.AAPL_040920C115'], frequency='m1', period='d1')
+
 
 '''
     REGULAR - WORKING
 '''
 
-# Actives
+# # Actives
 # TDStreamingClient.actives(service='ACTIVES_NASDAQ', venue='NASDAQ', duration='ALL')
 
 # # Quality of Service
@@ -66,29 +62,20 @@ TDStreamingClient.chart(service='CHART_FUTURES', symbols=['/CL'], fields=[0,1,2,
     LEVEL ONE DATA
 '''
 
-# Level One Quote
-TDStreamingClient.level_one_quotes(symbols=["SPY", "IVV", "SDS", "SH", "SPXL", "SPXS", "SPXU", "SSO", "UPRO", "VOO"],  fields=list(range(0,8)))
+# # Level One Quote
+# TDStreamingClient.level_one_quotes(symbols=["SPY", "IVV", "SDS", "SH", "SPXL", "SPXS", "SPXU", "SSO", "UPRO", "VOO"],  fields=list(range(0,8)))
 
 # # Level One Option
-# TDStreamingClient.level_one_options(symbols=['MSFT_030620P140'], fields=list(range(0,42)))
+# TDStreamingClient.level_one_options(symbols=['AAPL_040920C115'], fields=list(range(0,42)))
 
 # # Level One Futures
 # TDStreamingClient.level_one_futures(symbols=['/CL'], fields=["0", "1", "2", "3", "4"])
 
-# # Level One Forex - VALIDATE JSON RESPONSE
+# # Level One Forex
 # TDStreamingClient.level_one_forex(symbols=['EUR/USD'], fields=list(range(0,26)))
 
-# # Level One Futures Options - VALIDATE JSON RESPONSE
+# # Level One Futures Options
 # TDStreamingClient.level_one_futures_options(symbols=['./E1AG20C3220'], fields=list(range(0,36)))
-
-# # Charts Futures
-# TDStreamingClient.chart(service='CHART_FUTURES', symbols=['/ES'], fields=[0,1,2,3,4,5,6,7])
-
-# # Charts Options - CANT GET TO WORK.
-# TDStreamingClient.chart(service='CHART_OPTIONS', symbols=['/ESM20'], fields=[0,1,2,3,4,5,6,7])
-
-# # Chart History Futures
-# TDStreamingClient.chart_history_futures(symbol = ['./E3CJ20C2825'], frequency='m1', period='d1')
 
 # # Timesale
 # TDStreamingClient.timesale(service='TIMESALE_FUTURES', symbols=['/ES'], fields=[0, 1, 2, 3, 4])
@@ -124,10 +111,6 @@ TDStreamingClient.level_one_quotes(symbols=["SPY", "IVV", "SDS", "SH", "SPXL", "
 # TDStreamingClient.account_activity()
 
 
-# '''
-#     EXPERIMENTAL SECTION
-# '''
-
 # # Level Two Options
 # TDStreamingClient.level_two_options(symbols=['ESH20_022120C20'], fields = [0,1,2])
 
@@ -137,12 +120,13 @@ TDStreamingClient.level_one_quotes(symbols=["SPY", "IVV", "SDS", "SH", "SPXL", "
 # # Level Two NASQDAQ
 # TDStreamingClient.level_two_nasdaq(symbols = ['MSFT'], fields = [0,1,2])
 
-# # Level Two NYSE
-# TDStreamingClient.level_two_nyse(symbols = ['AA'], fields = [0,1,2])
-
 # # Level Two Total View 
 # TDStreamingClient.level_two_total_view(symbols = ['AAPL'], fields = [0,1,2])
 
+
+# '''
+#     EXPERIMENTAL SECTION
+# '''
 
 # # Level Two Futures - NOT WORKING - MAY WORK IF YOU HAVE FUTURES TRADING ENABLED ON YOUR ACCOUNT.
 # TDStreamingClient.level_two_futures(symbols=['/ES'], fields= [0,1,2])
@@ -153,23 +137,8 @@ TDStreamingClient.level_one_quotes(symbols=["SPY", "IVV", "SDS", "SH", "SPXL", "
 # # Level Two Futures Options - MAY WORK IF YOU HAVE FUTURES TRADING ENABLED ON YOUR ACCOUNT.
 # TDStreamingClient.level_two_futures_options(symbols=['./E1AG20'])
 
+# # Level Two NYSE
+# TDStreamingClient._level_two_nyse(symbols = ['AAU'], fields = [1, 2])
+
 # Stream it.
-TDStreamingClient.stream()
-
-
-'''
-    DEFINING CLOSE LOGIC
-
-    Closing the stream involves defining the number of seconds you want to keep it open. Right now,
-    the logic is basic but in future releases we will be able to specify specific times like during
-    market hours.
-'''
-
-# # Let's keep the server open for only 10 seconds, so define the time in seconds.
-# keep_open_in_seconds = 10
-
-# # Call the streaming client, and set the logic.
-# TDStreamingClient.close_logic(run_duration=keep_open_in_seconds)
-
-# # Start Streaming.
-# TDStreamingClient.stream()
+TDStreamingClient.stream(print_to_console=True)
