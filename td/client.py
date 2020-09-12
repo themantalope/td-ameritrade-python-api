@@ -15,6 +15,10 @@ from td.orders import OrderLeg
 from td.stream import TDStreamerClient
 from td.fields import VALID_CHART_VALUES
 from td.fields import ENDPOINT_ARGUMENTS
+from ratelimit import limits, RateLimitException
+from backoff import on_exception, fibo
+
+ONE_MINUTE = 60
 
 
 
@@ -410,6 +414,8 @@ class TDClient():
             self.grab_refresh_token()
 
 
+    @on_exception(fibo, RateLimitException, max_tries=20)
+    @limits(calls=120, period=ONE_MINUTE)
     def _make_request(self, method: str, endpoint: str, mode: str = None, params: dict = None, data: dict = None, json:dict = None, 
                         order_details: bool = False) -> Any:
         """Handles all the requests in the library.
@@ -449,6 +455,7 @@ class TDClient():
             del headers['Authorization']
 
         # Handle the request.
+
         if method == 'get':   
             response = requests.get(url=url, headers=headers, params=params, data=data, json=json, verify=True)
         elif method == 'post':            
@@ -459,7 +466,7 @@ class TDClient():
             response = requests.delete(url=url, headers=headers, params=params, data=data, json=json, verify=True)
         elif method == 'patch':
             response = requests.patch(url=url, headers=headers, params=params, data=data, json=json, verify=True)
-
+        
         # grab the status code
         status_code = response.status_code
 
@@ -491,7 +498,14 @@ class TDClient():
                 return response.json()
 
 
-
+        elif status_code == 429:
+            # too many requests
+            Warning('too many requests issued, waiting...')
+            # raise Exception('TD Ameritrade API response code: {}'.format(status_code))
+            print('too many requests issued...retrying request')
+            raise RateLimitException('TD Ameritrade API response code: {}'.format(status_code), period_remaining=1)
+        
+        
         elif status_code in (401, 400, 403, 415, 500):
             print('-'*80)
             print("BAD REQUEST - STATUS CODE: {}".format(status_code))
@@ -914,6 +928,8 @@ class TDClient():
 
         # otherwise take the args dictionary.
         params = option_chain
+        if not params['apikey']:
+            params['apikey'] = self.client_id
 
         # return the response of the get request.
         return self._make_request(method='get', endpoint=endpoint, params=params)
