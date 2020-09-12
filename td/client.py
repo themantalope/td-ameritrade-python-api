@@ -527,21 +527,6 @@ class TDClient():
         elif endpoint == self.config['token_endpoint']:
             del headers['Authorization']
 
-<<<<<<< HEAD
-        # Handle the request.
-
-        if method == 'get':   
-            response = requests.get(url=url, headers=headers, params=params, data=data, json=json, verify=True)
-        elif method == 'post':            
-            response = requests.post(url=url, headers=headers, params=params, data=data, json=json, verify=True)
-        elif method == 'put':
-            response = requests.put(url=url, headers=headers, params=params, data=data, json=json, verify=True)
-        elif method == 'delete':
-            response = requests.delete(url=url, headers=headers, params=params, data=data, json=json, verify=True)
-        elif method == 'patch':
-            response = requests.patch(url=url, headers=headers, params=params, data=data, json=json, verify=True)
-        
-=======
         # Define a new session.
         request_session = requests.Session()
         request_session.verify = True
@@ -561,7 +546,6 @@ class TDClient():
 
         request_session.close()
 
->>>>>>> master
         # grab the status code
         status_code = response.status_code
 
@@ -591,24 +575,6 @@ class TDClient():
         elif response.ok:
             return response.json()
 
-<<<<<<< HEAD
-        elif status_code == 429:
-            # too many requests
-            Warning('too many requests issued, waiting...')
-            # raise Exception('TD Ameritrade API response code: {}'.format(status_code))
-            print('too many requests issued...retrying request')
-            raise RateLimitException('TD Ameritrade API response code: {}'.format(status_code), period_remaining=1)
-        
-        
-        elif status_code in (401, 400, 403, 415, 500):
-            print('-'*80)
-            print("BAD REQUEST - STATUS CODE: {}".format(status_code))
-            print("RESPONSE URL: {}".format(response.url))
-            print("RESPONSE HEADERS: {}".format(response.headers))
-            print("RESPONSE PARAMS: {}".format(response.links))
-            print("RESPONSE TEXT: {}".format(response.text))
-            print('-'*80)
-=======
         else:
 
             if response.status_code == 400:
@@ -625,7 +591,6 @@ class TDClient():
                 raise ServerError(message=response.text)
             elif response.status_code > 400:
                 raise GeneralError(message=response.text)
->>>>>>> master
 
     def _validate_arguments(self, endpoint: str, parameter_name: str, parameter_argument: List[str]) -> bool:
         """Validates arguments for an API call.
@@ -1047,14 +1012,6 @@ class TDClient():
         # define the endpoint
         endpoint = 'marketdata/chains'
 
-<<<<<<< HEAD
-        # otherwise take the args dictionary.
-        params = option_chain
-        if not params['apikey']:
-            params['apikey'] = self.client_id
-
-=======
->>>>>>> master
         # return the response of the get request.
         return self._make_request(method='get', endpoint=endpoint, params=params)
 
